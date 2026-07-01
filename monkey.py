@@ -171,15 +171,21 @@ def draw_landmarks(image, landmarks, is_hand=False, color=(0, 255, 0)):
             cx, cy = int(lm.x * w), int(lm.y * h)
             cv2.circle(image, (cx, cy), 4, (0, 0, 255), -1)
 
-# Load reference images
-ref_folder = r"C:\Users\Samriddha\Desktop\monkeypose\monkey_refs"
+# Load reference images (use project-relative path so it works regardless of where script is started)
+ref_folder = os.path.join(os.path.dirname(__file__), "monkey_refs")
 ref_images = {}
 for fname in ["monkey1.jpeg", "monkey2.jpeg", "monkey3.jpeg", "monkey4.jpg", "monkey5_converted.jpg", "monkey8.jpg"]:
     img_path = os.path.join(ref_folder, fname)
-    if os.path.exists(img_path):
-        img = cv2.imread(img_path)
-        if img is not None:
-            ref_images[fname] = img
+    if not os.path.exists(img_path):
+        print(f"### Warning: reference file not found: {img_path}")
+        continue
+    img = cv2.imread(img_path)
+    if img is None:
+        print(f"### Warning: failed to load image {img_path}")
+        continue
+    ref_images[fname] = img
+
+print(f"### Loaded {len(ref_images)} reference images from {ref_folder}")
 
 # Default image (monkey1) and blank image for no match
 default_image = cv2.resize(ref_images.get("monkey1.jpeg", np.zeros((200, 200, 3), dtype=np.uint8)), (200, 200))
