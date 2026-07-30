@@ -22,7 +22,8 @@ MonkeyPose is a real-time gesture recognition application that uses your webcam 
 
 ## Requirements
 
-- Python 3.8+
+- Recommended: Python 3.11
+- On Windows, use `py -3.11` for the best compatibility with this project
 - OpenCV (`opencv-python`)
 - MediaPipe (`mediapipe`)
 - NumPy (`numpy`)
@@ -35,7 +36,7 @@ MonkeyPose is a real-time gesture recognition application that uses your webcam 
 2. **Install dependencies**:
 
    ```bash
-   pip install opencv-python mediapipe numpy
+   py -3.11 -m pip install opencv-python mediapipe numpy
    ```
 
 3. **Prepare reference images**:
@@ -53,11 +54,10 @@ MonkeyPose is a real-time gesture recognition application that uses your webcam 
 1. **Run the application**:
 
    ```bash
-   python monkey.py
+   py -3.11 monkey.py
    ```
 
 2. **Interact with the webcam**:
-
    - Show different gestures to trigger corresponding monkey images
    - Press `q` to quit the application
 
