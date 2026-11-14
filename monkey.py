@@ -5,9 +5,6 @@ import os
 import sys
 import datetime
 
-# Redirect stdout for debugging
-sys.stdout = sys.__stdout__
-
 print(f"### Script started at {datetime.datetime.now()}")
 print(f"### Python version: {sys.version}")
 print(f"### OpenCV version: {cv2.__version__}")
@@ -62,15 +59,6 @@ def is_index_finger_up(hand_points):
     index_pip_y = hand_points[6][1]
     # Index tip must be well above its own PIP joint
     return index_tip_y < (index_pip_y - 20)
-
-# Check if ANY hand has middle finger up
-def any_hand_has_middle_finger_up(hand_landmarks_list):
-    if not hand_landmarks_list:
-        return False
-    for _, hand_points in hand_landmarks_list:
-        if is_middle_finger_up(hand_points):
-            return True
-    return False
 
 # Index finger biting check
 def is_biting_index_finger(face_landmarks, hand_points, frame):
@@ -138,16 +126,6 @@ def is_both_middle_fingers_up(hand_landmarks_list):
         if is_middle_finger_up(hand_points):
             middle_up_count += 1
     return middle_up_count >= 2
-
-# Looking up check
-def is_looking_up(face_landmarks):
-    if not face_landmarks:
-        return False
-    # Get the nose tip (landmark 4) and chin (landmark 152)
-    nose_y = face_landmarks[4].y
-    chin_y = face_landmarks[152].y
-    # If nose is significantly above chin, looking up
-    return (chin_y - nose_y) > 0.15
 
 # Draw landmarks
 def draw_landmarks(image, landmarks, is_hand=False, color=(0, 255, 0)):
@@ -241,8 +219,8 @@ try:
         if face_results.multi_face_landmarks:
             draw_landmarks(frame, face_results.multi_face_landmarks[0].landmark)
         if hand_results.multi_hand_landmarks:
-            for hand_landmarks in hand_results.multi_hand_landmarks:
-                draw_landmarks(frame, hand_landmarks.landmark, is_hand=True)
+            for hand in hand_results.multi_hand_landmarks:
+                draw_landmarks(frame, hand.landmark, is_hand=True)
 
         # Show webcam
         cv2.imshow("Monkey Pose Matcher", frame)
