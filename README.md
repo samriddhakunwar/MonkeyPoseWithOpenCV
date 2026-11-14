@@ -5,7 +5,7 @@ MonkeyPose is a real-time gesture recognition application that uses your webcam 
 ## Features
 
 - **Real-time Gesture Detection**: Uses MediaPipe to detect face and hand landmarks
-- **Multiple Pose Recognition**: Supports 8 different monkey poses based on various gestures
+- **Multiple Pose Recognition**: Supports 6 different monkey poses based on various gestures
 - **Live Webcam Feed**: Displays matched images in real-time on the webcam feed
 - **Easy to Extend**: Simple function-based gesture detection system
 
@@ -36,7 +36,7 @@ MonkeyPose is a real-time gesture recognition application that uses your webcam 
 2. **Install dependencies**:
 
    ```bash
-   py -3.11 -m pip install opencv-python mediapipe numpy
+   py -3.11 -m pip install -r requirements.txt
    ```
 
 3. **Prepare reference images**:
