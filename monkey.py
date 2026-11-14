@@ -179,10 +179,6 @@ for fname in ["monkey1.jpeg", "monkey2.jpeg", "monkey3.jpeg", "monkey4.jpg", "mo
 
 print(f"### Loaded {len(ref_images)} reference images from {ref_folder}")
 
-# Default image (monkey1) and blank image for no match
-default_image = cv2.resize(ref_images.get("monkey1.jpeg", np.zeros((200, 200, 3), dtype=np.uint8)), (200, 200))
-blank_image = np.zeros((200, 200, 3), dtype=np.uint8)
-
 # Start webcam
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
@@ -190,9 +186,7 @@ if not cap.isOpened():
     sys.exit(1)
 
 try:
-    last_match_time = datetime.datetime.now()
-    current_match = blank_image  # Start with blank image, no default
-    match_duration = 5  # seconds
+    current_match = None  # name of the matched reference image, None = no match
 
     while True:
         ret, frame = cap.read()
@@ -208,49 +202,40 @@ try:
         hand_landmarks = get_hand_landmarks(frame, hand_results)
 
         # Determine match (start with blank, only show if pose matches)
-        best_match_img = blank_image
+        best_match = None
         if face_landmarks:
             # Check wide mouth FIRST (priority)
             if is_mouth_wide_open(face_landmarks):
-                best_match_img = ref_images.get("monkey5_converted.jpg", default_image)
+                best_match = "monkey5_converted.jpg"
             elif hand_landmarks:
                 teeth_showing = is_teeth_showing(face_landmarks)
                 if len(hand_landmarks) == 1:
                     # Check biting FIRST (higher priority) to avoid collision with index up detection
                     if is_biting_index_finger(face_landmarks, hand_landmarks[0][1], frame):
-                        best_match_img = ref_images.get("monkey2.jpeg", default_image)
+                        best_match = "monkey2.jpeg"
                     # Monkey1: BOTH index finger up AND teeth showing required (only with 1 hand, NO middle fingers)
                     elif (is_index_finger_up(hand_landmarks[0][1]) and teeth_showing
                           and not is_middle_finger_up(hand_landmarks[0][1])):
-                        best_match_img = ref_images.get("monkey1.jpeg", default_image)
+                        best_match = "monkey1.jpeg"
                 elif len(hand_landmarks) >= 2:
                     # Check both middle fingers up FIRST (higher priority)
                     if is_both_middle_fingers_up(hand_landmarks):
-                        best_match_img = ref_images.get("monkey8.jpg", default_image)
+                        best_match = "monkey8.jpg"
                     # Check both hands above head SECOND
                     elif is_both_hands_above_head(face_landmarks, hand_landmarks, frame):
-                        best_match_img = ref_images.get("monkey4.jpg", default_image)
+                        best_match = "monkey4.jpg"
                     # Check hand below face and pointing (only if NOT both middle fingers)
                     elif is_one_hand_below_face_and_pointing(face_landmarks, hand_landmarks, frame):
-                        best_match_img = ref_images.get("monkey3.jpeg", default_image)
+                        best_match = "monkey3.jpeg"
 
         # Update current match - change immediately when gesture changes
-        if best_match_img is not current_match:
-            current_match = best_match_img
-            last_match_time = datetime.datetime.now()
+        if best_match != current_match:
+            current_match = best_match
+            print(f"### Gesture detected: Displaying {current_match or 'nothing'} at {datetime.datetime.now()}")
 
-            # Safe match name printing
-            matched_name = "default"
-            for name, img in ref_images.items():
-                if np.array_equal(img, current_match) if img is not None and current_match is not None else img is current_match:
-                    matched_name = name
-                    break
-            print(f"### Gesture detected: Displaying {matched_name} at {datetime.datetime.now()}")
-
-        # Resize for overlay
-        if current_match is not None and not np.array_equal(current_match, blank_image):
-            overlay_img = cv2.resize(current_match, (200, 200))
-            frame[10:210, 10:210] = overlay_img
+        # Overlay matched image (skip if no match or image failed to load)
+        if current_match in ref_images:
+            frame[10:210, 10:210] = cv2.resize(ref_images[current_match], (200, 200))
 
         # Draw landmarks
         if face_results.multi_face_landmarks:
