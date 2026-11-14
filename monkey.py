@@ -59,9 +59,9 @@ def is_index_finger_up(hand_points):
     if len(hand_points) < 9:
         return False
     index_tip_y = hand_points[8][1]
-    middle_base_y = hand_points[6][1]
-    # Stricter: index must be significantly higher than middle finger base
-    return index_tip_y < (middle_base_y - 20)
+    index_pip_y = hand_points[6][1]
+    # Index tip must be well above its own PIP joint
+    return index_tip_y < (index_pip_y - 20)
 
 # Check if ANY hand has middle finger up
 def any_hand_has_middle_finger_up(hand_landmarks_list):
@@ -115,19 +115,21 @@ def is_both_hands_above_head(face_landmarks, hand_landmarks_list, frame):
 
 # Middle finger up check
 def is_middle_finger_up(hand_points):
-    if len(hand_points) < 12:
+    if len(hand_points) < 13:
         return False
     middle_tip_y = hand_points[12][1]
-    ring_base_y = hand_points[10][1]
+    middle_pip_y = hand_points[10][1]
     index_tip_y = hand_points[8][1]
-    middle_base_y = hand_points[6][1]
+    index_pip_y = hand_points[6][1]
 
-    # Middle finger must be significantly higher than ring finger base
-    middle_up = middle_tip_y < (ring_base_y - 20)
+    # Middle finger tip must be well above its own PIP joint
+    middle_up = middle_tip_y < (middle_pip_y - 20)
     # Index finger must NOT be up (to avoid confusion with index finger pose)
-    index_not_up = index_tip_y >= (middle_base_y - 20)
+    index_not_up = index_tip_y >= (index_pip_y - 20)
 
-    return middle_up and index_not_up# Both middle fingers up check
+    return middle_up and index_not_up
+
+# Both middle fingers up check
 def is_both_middle_fingers_up(hand_landmarks_list):
     if len(hand_landmarks_list) < 2:
         return False
