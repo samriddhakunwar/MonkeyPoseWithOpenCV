@@ -23,16 +23,6 @@ except Exception as e:
     print(f"### Error initializing MediaPipe: {str(e)} at {datetime.datetime.now()}")
     sys.exit(1)
 
-# Function to extract face landmarks
-def get_face_landmarks(image):
-    if image is None:
-        return None
-    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = face_mesh.process(rgb)
-    if not results.multi_face_landmarks:
-        return None
-    return results.multi_face_landmarks[0].landmark
-
 # Function to extract hand landmarks
 def get_hand_landmarks(image, results):
     if image is None or not results.multi_hand_landmarks:
@@ -212,7 +202,7 @@ try:
         face_results = face_mesh.process(rgb)
         hand_results = hands.process(rgb)
 
-        face_landmarks = get_face_landmarks(frame) if face_results.multi_face_landmarks else None
+        face_landmarks = face_results.multi_face_landmarks[0].landmark if face_results.multi_face_landmarks else None
         hand_landmarks = get_hand_landmarks(frame, hand_results)
 
         # Determine match (start with blank, only show if pose matches)
